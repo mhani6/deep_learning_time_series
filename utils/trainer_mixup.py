@@ -8,7 +8,7 @@ import time
 import os
 import json
 
-from data.dataset import mixup_batch
+from data.dataset_augment import mixup_batch
 
 
 class EarlyStopping:
@@ -30,7 +30,7 @@ class EarlyStopping:
                 self.stop = True
 
 
-def train_epoch(model, loader, optimizer, criterion, device, n_classes, use_mixup=True):
+def train_epoch(model, loader, optimizer, criterion, device, n_classes, use_mixup):
     model.train()
     total_loss, correct, n = 0., 0, 0
 
@@ -38,17 +38,13 @@ def train_epoch(model, loader, optimizer, criterion, device, n_classes, use_mixu
         X, y = X.to(device), y.to(device)
 
         if use_mixup and torch.rand(1) < 0.5:
-            # Apply mixup — use soft labels with KL div loss
             X_mix, y_soft = mixup_batch(X, y, n_classes, alpha=0.4)
             y_soft = y_soft.to(device)
             optimizer.zero_grad()
             logits = model(X_mix)
             log_probs = F.log_softmax(logits, dim=-1)
             loss = -(y_soft * log_probs).sum(dim=-1).mean()
-            # Accuracy: compare against hard label of the dominant mix class
-            preds = logits.argmax(1)
-            hard_y = y_soft.argmax(1)
-            correct += (preds == hard_y).sum().item()
+            correct += (logits.argmax(1) == y_soft.argmax(1)).sum().item()
         else:
             optimizer.zero_grad()
             logits = model(X)
@@ -58,7 +54,6 @@ def train_epoch(model, loader, optimizer, criterion, device, n_classes, use_mixu
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
-
         total_loss += loss.item() * len(y)
         n += len(y)
 

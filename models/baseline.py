@@ -42,17 +42,17 @@ class InceptionTime(nn.Module):
         blocks = []
         residuals = []
         in_ch = n_channels
+        res_in_ch = n_channels
 
         for i in range(depth):
             blocks.append(InceptionBlock(in_ch, nb_filters))
+            in_ch = out_channels
             if i % 3 == 2:
                 residuals.append(nn.Sequential(
-                    nn.Conv1d(in_ch, out_channels, kernel_size=1, bias=False),
+                    nn.Conv1d(res_in_ch, out_channels, kernel_size=1, bias=False),
                     nn.BatchNorm1d(out_channels),
                 ))
-            else:
-                residuals.append(None)
-            in_ch = out_channels
+                res_in_ch = out_channels
 
         self.blocks    = nn.ModuleList(blocks)
         self.residuals = nn.ModuleList([r for r in residuals if r is not None])

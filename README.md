@@ -46,8 +46,4 @@ python train.py --model baseline
 | UniTS | Unified Transformer (seq + var attention + DLO) | Task tokenization, dual attention | NeurIPS 2024 |
 | InceptionTime | CNN | Multi-scale inception blocks | 2020 |
 
-## Teammates
 
-- Your name — PatchTST
-- Teammate 1 — MOMENT
-- Teammate 2 — CHRONOS

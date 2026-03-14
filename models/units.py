@@ -232,18 +232,18 @@ class UniTSClassifier(nn.Module):
 
 
 def build_units(seq_len, n_channels, n_classes, device):
-    """Build UniTS with sensible defaults for LSST (T=36, C=6, 14 classes)."""
+    """Build UniTS with increased capacity for LSST (T=36, C=6, 14 classes)."""
     model = UniTSClassifier(
         seq_len=seq_len,
         n_channels=n_channels,
         n_classes=n_classes,
-        d_model=64,
-        n_heads=4,
-        n_layers=4,
-        d_ff=256,
+        d_model=128,
+        n_heads=8,
+        n_layers=6,
+        d_ff=512,
         dropout=0.1,
         head_dropout=0.2,
-        dlo_rank=8,
+        dlo_rank=16,
     )
     model = model.to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
